@@ -1,11 +1,11 @@
+import asyncio
 from typing import List
-
 from aiogram import Dispatcher
 from gino import Gino
 import sqlalchemy as sa
 from sqlalchemy import Column, DateTime
-
 from tgbot.data import config
+from tgbot.loader import dp
 
 db = Gino()
 

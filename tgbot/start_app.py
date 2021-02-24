@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import executor
 
 from tgbot.loader import dp
