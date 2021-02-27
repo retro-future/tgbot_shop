@@ -6,6 +6,7 @@ class Category(BaseModel):
     __tablename__ = 'tgbot_category'
     id = Column(Integer, primary_key=True)
     name = Column(String(200), index=True)
+    tg_name = Column(String(200))
     description = Column(Text)
     slug = Column(String(160), unique=True)
 
@@ -28,6 +29,7 @@ class Subcategory(BaseModel):
     __tablename__ = 'tgbot_subcategory'
     id = Column(Integer, primary_key=True)
     name = Column(String(200), index=True)
+    tg_name = Column(String(200))
     description = Column(Text)
     slug = Column(String(160), unique=True)
     category_id = Column(Integer, ForeignKey('tgbot_category.id'))

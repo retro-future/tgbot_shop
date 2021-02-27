@@ -3,6 +3,7 @@ from django.db import models
 
 class Category(models.Model):
     name = models.CharField(max_length=200, db_index=True)
+    tg_name = models.CharField(max_length=200, blank=True)
     description = models.TextField()
     slug = models.SlugField(max_length=160, unique=True)
 
@@ -16,6 +17,7 @@ class Category(models.Model):
 
 class Subcategory(models.Model):
     name = models.CharField(max_length=200, db_index=True)
+    tg_name = models.CharField(max_length=200, blank=True)
     description = models.TextField()
     slug = models.SlugField(max_length=160, unique=True)
     category = models.ForeignKey(Category, related_name='subcategories', on_delete=models.PROTECT)
