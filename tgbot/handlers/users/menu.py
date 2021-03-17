@@ -3,11 +3,12 @@ from typing import Union
 
 from aiogram.dispatcher.filters import Command
 from aiogram import types
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, InputFile
 from tgbot.keyboards.default.menu_kb import menu
-from tgbot.keyboards.inline.callback_datas import category_callback, multi_menu
+from tgbot.keyboards.inline.callback_datas import multi_menu
 from tgbot.keyboards.inline.category_kb import category_keyboard, subcategory_keyboard
 from tgbot.loader import dp
+from tgbot.utils.db_api.quick_commands import show_product
 
 
 @dp.message_handler(Command("menu"))
@@ -17,7 +18,6 @@ async def show_menu(message: types.Message):
 
 @dp.message_handler(text="🛍 Tovarlar")
 async def delegate_to_categories(message: types.Message):
-    # await message.answer("Вот что у нас есть", reply_markup=await category_keyboard())
     await show_category(message)
 
 
@@ -32,14 +32,17 @@ async def show_category(message: Union[types.Message, types.CallbackQuery], **kw
 
 
 async def show_subcategory(call: CallbackQuery, category_id, **kwargs):  # category_id taking category_id
-    markup = await subcategory_keyboard(int(category_id))                # from callback_data and give it
-    logging.info(f"callback_id={category_id}")                           # keyboard generator
+    markup = await subcategory_keyboard(int(category_id))  # from callback_data and give it
+    logging.info(f"callback_id={category_id}")  # keyboard generator
     await call.message.edit_reply_markup(reply_markup=markup)
+
+
+# async def show_products(call: CallbackQuery, subcategory_id, **kwargs):
+#
 
 
 @dp.callback_query_handler(multi_menu.filter())
 async def navigate(call: types.CallbackQuery, callback_data: dict):
-    await call.answer(cache_time=1)
     current_level = callback_data.get("level")
     category = callback_data.get("category_id")
     subcategory = callback_data.get("subcategory_id")
@@ -58,3 +61,26 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
         subcategory=subcategory,
         item_id=item_id
     )
+
+
+@dp.message_handler(Command("send_photo"))
+async def send_photo(message: types.Message):
+    photo_bytes = InputFile(path_or_bytesio="../products/2021/03/12/SamsungGalaxyS20Ultra__1_.jpeg")
+    msg = await message.answer_photo(photo_bytes)
+    file_id = msg.photo[-1].file_id
+    print(len(file_id))
+
+
+@dp.message_handler(Command("show_product"))
+async def show_all_product(message: types.Message):
+    products_qs = await show_product()
+    for product in products_qs:
+        if not product.image_file_id:
+            photo_path = InputFile(path_or_bytesio="../" + product.image)
+            msg = await message.answer_photo(photo_path)
+            file_id = msg.photo[-1].file_id
+            await product.update(image_file_id=file_id).apply()
+        else:
+            photo_path = product.image_file_id
+            await message.answer_photo(photo_path)
+

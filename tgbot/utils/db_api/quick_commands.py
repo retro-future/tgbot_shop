@@ -4,20 +4,10 @@ from tgbot.data import config
 import asyncio
 
 from tgbot.utils.db_api.db_gino import db
-from tgbot.utils.db_api.schemas.goods import Subcategory, Category
+from tgbot.utils.db_api.schemas.goods import Subcategory, Category, Product
 
 
-async def show_category():
-    categories = await Category.query.gino.all()
-    return categories
-
-
-async def show_subcategory():
-    subcategories = await Subcategory.query.gino.all()
-    return subcategories
-
-
-async def get_parent_child():
+async def get_parent_child():  # get child model with children attribute
     query = Subcategory.outerjoin(Category).select()
     parent = await query.gino.load(Category.distinct(Category.id).load(add_child=Subcategory)).all()
     return parent
@@ -30,10 +20,22 @@ async def get_child_parent(category_id: int):
     return result
 
 
+async def show_all_products(subcategory_id: int):
+    async with db.transaction():
+        query = Product.load(parent=Subcategory).where(Subcategory.id == subcategory_id)
+        result = await query.gino.all()
+    return result
+
+
+async def show_product():
+    products = await Product.query.gino.all()
+    return products
+
+
 async def test():
     engine = await gino.create_engine(config.POSTGRES_URI)
     db.bind = engine
-    result = await get_parent_child()
+    result = await show_all_products(2)
     for i in result:
         print(i)
 

@@ -35,9 +35,9 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     available = models.BooleanField(default=True)
-    viewed = models.BooleanField(default=False)
     slug = models.SlugField(max_length=160, db_index=True)
     image = models.ImageField(upload_to='products/%Y/%m/%d', blank=True)
+    image_file_id = models.CharField(max_length=200, db_index=True, blank=True)
     subcategory = models.ForeignKey(Subcategory, related_name='products', on_delete=models.PROTECT)
 
     def __str__(self):

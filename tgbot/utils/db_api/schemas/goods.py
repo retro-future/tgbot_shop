@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, sql, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, sql, ForeignKey, Boolean, VARCHAR, DECIMAL
 from tgbot.utils.db_api.db_gino import BaseModel
 
 
@@ -33,3 +33,15 @@ class Subcategory(BaseModel):
     description = Column(Text)
     slug = Column(String(160), unique=True)
     category_id = Column(Integer, ForeignKey('tgbot_category.id'))
+
+
+class Product(BaseModel):
+    __tablename__ = 'tgbot_product'
+    id = Column(Integer, primary_key=True)
+    title = Column(VARCHAR(150), index=True)
+    description = Column(Text)
+    price = Column(DECIMAL(precision=2, scale=10))
+    available = Column(Boolean)
+    image = Column(VARCHAR(100))
+    image_file_id = Column(VARCHAR(200), index=True)
+    subcategory_id = Column(Integer, ForeignKey('tgbot_subcategory.id'))
