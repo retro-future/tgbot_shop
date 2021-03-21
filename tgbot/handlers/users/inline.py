@@ -1,50 +1,38 @@
 from aiogram import types
-from aiogram.dispatcher.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from tgbot.loader import dp
+from tgbot.filters import IsSubcategoryName
+from tgbot.utils.db_api.quick_commands import show_products_inline
 
 
-# @dp.inline_handler(text="")
-# async def empty_query(query: types.InlineQuery):
-#     await query.answer(
-#         results=[
-#             types.InlineQueryResultArticle(
-#                 id="unknown",
-#                 title="Введите какой-то запрос",
-#                 input_message_content=types.InputTextMessageContent(
-#                     message_text="Не обязательно жать при этом на кнопку",
-#                     parse_mode="HTML"
-#                 ),
-#             ),
-#         ],
-#
-#         cache_time=5)
+my_reply = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="не нажимай на меня ", callback_data="buy:5:apple")
+    ]
+])
 
 
-# @dp.inline_handler()
-# async def empty_query(query: types.InlineQuery):
-#     word_list = ["cake", "beer"]
-#     if query.query in word_list:
-#         await query.answer(
-#             results=[
-#                 types.InlineQueryResultArticle(
-#                     id="unknown",
-#                     title=f"Написал {query.query}",
-#                     input_message_content=types.InputTextMessageContent(
-#                         message_text="Не обязательно жать при этом на кнопку",
-#                         parse_mode="HTML"
-#                     ),
-#                 ),
-#             ],
-#
-#             cache_time=5)
-#     print(query.query)
-
-
-@dp.message_handler(Command("show_apple"))
-async def answer_to_message(message: types.Message):
-    markup = InlineKeyboardMarkup(row_width=1)
-    markup.insert(InlineKeyboardButton("press button",
-                                       switch_inline_query_current_chat="apples"))
-    await message.answer("press the button", reply_markup=markup)
+@dp.inline_handler(IsSubcategoryName(), regexp="^.{4,}")
+async def empty_query(query: types.InlineQuery):
+    print(query.query)
+    query_text = query.query
+    products_qs = await show_products_inline(query_text)
+    query_answer = []
+    for product in products_qs:
+        query_answer.append(
+            types.InlineQueryResultArticle(
+                id=str(product.id),
+                title=product.title,
+                input_message_content=types.InputTextMessageContent(
+                    message_text=f"<a href='{product.image}'>{product.title}</a>", parse_mode="HTML"
+                ),
+                reply_markup=my_reply,
+                description=str(product.price),
+                thumb_url=product.image,
+            )
+        )
+    await query.answer(
+        results=query_answer,
+        cache_time=20
+    )

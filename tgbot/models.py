@@ -1,4 +1,6 @@
 from django.db import models
+import asyncio
+from tgbot.utils.get_link_or_id import get_file_id, photo_link
 
 
 class Category(models.Model):
@@ -42,6 +44,12 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        image_bytes = self.image.read()
+        link = asyncio.run(photo_link(image_bytes))
+        self.image = link
+        super(Product, self).save(*args, *kwargs)
 
     class Meta:
         verbose_name = "Товар"

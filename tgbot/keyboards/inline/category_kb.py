@@ -22,7 +22,7 @@ async def subcategory_keyboard(category_id: int):  # accepting category_id and g
         callback_data = await navigate_callback(level=current_level + 1, category_id=category_id,
                                                 subcategory_id=subcategory.id)
         subcategories_markup.insert(InlineKeyboardButton(text=f"{subcategory.tg_name}",
-                                                         callback_data=callback_data))
+                                                         switch_inline_query_current_chat=subcategory.tg_name))
 
     subcategories_markup.row(
         InlineKeyboardButton(text="◀ Назад",

@@ -1,10 +1,8 @@
-import asyncio
-
 from aiogram import executor
 
 from tgbot.loader import dp
-import middlewares, filters, handlers
 from tgbot.utils.db_api import db_gino
+import filters, middlewares, handlers
 from utils.set_bot_commands import set_default_commands
 from utils.notify_admins import on_startup_notify
 
