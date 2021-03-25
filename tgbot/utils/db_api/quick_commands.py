@@ -20,15 +20,8 @@ async def get_child_parent(category_id: int):
     return result
 
 
-async def show_all_products(subcategory_id: int):
-    async with db.transaction():
-        query = Product.load(parent=Subcategory).where(Subcategory.id == subcategory_id)
-        result = await query.gino.all()
-    return result
-
-
-async def show_product():
-    products = await Product.query.gino.all()
+async def get_product(product_id: int):
+    products = await Product.query.where(Product.id == product_id).gino.first()
     return products
 
 
@@ -47,7 +40,7 @@ async def show_all_subcategory():
 async def test():
     engine = await gino.create_engine(config.POSTGRES_URI)
     db.bind = engine
-    result = await show_all_subcategory()
+    result = await get_product(1)
     for i in result:
         print(i.tg_name)
 
