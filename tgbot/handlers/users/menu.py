@@ -86,3 +86,12 @@ async def send_photo(message: types.Message):
 #             photo_path = product.image_file_id
 #             await message.answer_photo(photo_path)
 #
+
+# @dp.message_handler(Command("redis"))
+# async def test_redis(message: types.Message):
+#     user_id = message.from_user.id
+#     data = {
+#         1: "first value of dict, and yes Redis is Working"
+#     }
+#     await set_value(user=user_id, data=data)
+#     await message.answer(text=await get_value(user_id))

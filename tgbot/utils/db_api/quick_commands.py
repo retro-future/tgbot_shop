@@ -40,9 +40,9 @@ async def show_all_subcategory():
 async def test():
     engine = await gino.create_engine(config.POSTGRES_URI)
     db.bind = engine
-    result = await get_product(1)
+    result = await get_parent_child()
     for i in result:
-        print(i.tg_name)
+        print(i)
 
 
 if __name__ == "__main__":

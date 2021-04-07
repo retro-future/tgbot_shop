@@ -3,12 +3,15 @@ from aiogram.utils.callback_data import CallbackData
 multi_menu = CallbackData("navigate", "level", "category_id", "subcategory_id", "item_id")
 category_callback = CallbackData("category", "level")
 subcategory_callback = CallbackData("subcategory", "subcategory_id")
-buy_callback = CallbackData("buy", "product_id")
+buy_callback = CallbackData("buy", "product_id", 'quantity', "product_price", "edit", "reduce", "add")
+test_callback = CallbackData("test_callback", "number")
 
 
 async def navigate_callback(level, category_id="0", subcategory_id="0", item_id="0"):
     return multi_menu.new(level=level, category_id=category_id, subcategory_id=subcategory_id, item_id=item_id)
 
 
-async def product_callback(product_id: int):
-    return buy_callback.new(product_id=product_id)
+def gen_buy_callback(product_id: int, quantity: int, product_price: int, edit: bool = False,
+                     reduce: bool = False, add: bool = False):
+    return buy_callback.new(product_id=product_id, quantity=quantity, product_price=product_price, edit=edit,
+                            reduce=reduce, add=add)
