@@ -1,8 +1,11 @@
 import gino
+from aiogram import types
+from aiogram.dispatcher import FSMContext
 
 from tgbot.data import config
 import asyncio
 
+from tgbot.keyboards.inline.product_kb import product_keyboard
 from tgbot.utils.db_api.db_gino import db
 from tgbot.utils.db_api.schemas.goods import Subcategory, Category, Product
 
@@ -21,15 +24,33 @@ async def get_child_parent(category_id: int):
 
 
 async def get_product(product_id: int):
-    products = await Product.query.where(Product.id == product_id).gino.first()
-    return products
+    product = await Product.query.where(Product.id == product_id).gino.first()
+    return product
 
 
-async def show_products_inline(subcategory_title: str):
+async def show_products_inline(subcategory_title: str, state: FSMContext):
+    query_answer = []
     async with db.transaction():
         query = Product.load(parent=Subcategory).where(Subcategory.tg_name == subcategory_title)
         result = await query.gino.all()
-    return result
+    for product in result:
+        subcategory_name = product.parent.tg_name
+        category_id = product.parent.category_id
+        markup = await product_keyboard(product.id, product.title, subcategory_name, product.price, category_id,
+                                        state=state)
+        query_answer.append(
+            types.InlineQueryResultArticle(
+                id=str(product.id),
+                title=product.title,
+                input_message_content=types.InputTextMessageContent(
+                    message_text=f"<a href='{product.image}'>{product.title}</a>", parse_mode="HTML"
+                ),
+                reply_markup=markup,
+                description=str(product.price),
+                thumb_url=product.image,
+            )
+        )
+    return query_answer, result[0]
 
 
 async def show_all_subcategory():

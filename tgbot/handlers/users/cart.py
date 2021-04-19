@@ -15,24 +15,26 @@ async def add_to_cart(call: types.CallbackQuery, callback_data: dict, state: FSM
     product_price = callback_data.get("product_price")
     product_id = callback_data.get("product_id")
     total = 1 * Decimal(product_price)
-    data = {
-        "products": {
-            product_id:
-                {
-                    "quantity": 1,
-                    "price": product_price,
-                    "total": float(total)
-                },
-        },
+    products = {
+        product_id:
+            {
+                "quantity": 1,
+                "price": product_price,
+                "total": float(total)
+            },
     }
     async with state.proxy() as state_data:
         if not state_data.get("products"):
-            await state.update_data(data=data)
-            await state.update_data(product_id=product_id)
+            state_data["products"] = products
         else:
-            state_data["products"].update(data["products"])
-
-    markup = product_edit_kb(data, product_id)
+            try:
+                state_data["products"][product_id]["quantity"] += 1
+            except KeyError:
+                state_data["products"].update(products)
+    markup = product_edit_kb(state_data, product_id)
+    await state.update_data(product_id=product_id)
+    print("=" * 100)
+    pprint(await state.get_data())
     await bot.edit_message_reply_markup(inline_message_id=call.inline_message_id,
                                         reply_markup=markup)
 
@@ -95,10 +97,12 @@ async def plus_one_quantity(call: types.CallbackQuery, callback_data: dict, stat
             return
         elif callback_data.get("reduce") == "True":
             products_list[callback_data.get("product_id")]['quantity'] -= 1
+            await call.answer(text="Удалено из корзины")
         elif callback_data.get("add") == "True":
             products_list[callback_data.get("product_id")]['quantity'] += 1
+            await call.answer(text="Добавлено в корзину")
 
     await bot.edit_message_reply_markup(inline_message_id=call["inline_message_id"],
                                         reply_markup=product_edit_kb(data=state_data,
-                                        product_id=callback_data.get("product_id")))
+                                                                     product_id=callback_data.get("product_id")))
     pprint(await state.get_data())
