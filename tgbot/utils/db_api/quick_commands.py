@@ -24,8 +24,10 @@ async def get_child_parent(category_id: int):
 
 
 async def get_product(product_id: int):
-    product = await Product.query.where(Product.id == product_id).gino.first()
-    return product
+    async with db.transaction():
+        product = Product.load(parent=Subcategory)
+        result = await product.where(Product.id == product_id).gino.first()
+    return result
 
 
 async def show_products_inline(subcategory_title: str, state: FSMContext):
@@ -36,7 +38,7 @@ async def show_products_inline(subcategory_title: str, state: FSMContext):
     for product in result:
         subcategory_name = product.parent.tg_name
         category_id = product.parent.category_id
-        markup = await product_keyboard(product.id, product.title, subcategory_name, product.price, category_id,
+        markup = await product_keyboard(str(product.id), product.title, subcategory_name, product.price, category_id,
                                         state=state)
         query_answer.append(
             types.InlineQueryResultArticle(

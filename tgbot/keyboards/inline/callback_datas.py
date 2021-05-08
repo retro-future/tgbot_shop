@@ -5,9 +5,10 @@ category_callback = CallbackData("category", "level")
 subcategory_callback = CallbackData("subcategory", "subcategory_id")
 buy_callback = CallbackData("buy", "product_id", "product_price", "edit", "reduce", "add", "category_id")
 test_callback = CallbackData("test_callback", "number")
+liked_product = CallbackData("liked_product", "add", "delete", "product_id")
 
 
-async def navigate_callback(level, category_id="0", subcategory_id="0", item_id="0"):
+def navigate_callback(level, category_id="0", subcategory_id="0", item_id="0"):
     return multi_menu.new(level=level, category_id=category_id, subcategory_id=subcategory_id, item_id=item_id)
 
 

@@ -11,7 +11,8 @@ from tgbot.loader import dp, bot
 
 @dp.message_handler(Command("menu"))
 async def show_menu(message: types.Message):
-    await message.answer("Главное Меню:", reply_markup=menu)
+    # await message.answer("Главное Меню:")
+    await message.reply(text="Главное Меню:", reply_markup=menu)
 
 
 @dp.message_handler(text="🛍 Товары")

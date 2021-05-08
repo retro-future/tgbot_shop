@@ -7,7 +7,7 @@ from tgbot.utils.db_api.quick_commands import show_products_inline
 
 
 @dp.inline_handler(IsSubcategoryName(), regexp="^.{4,}")
-async def empty_query(query: types.InlineQuery, state: FSMContext):
+async def inline_products(query: types.InlineQuery, state: FSMContext):
     query_text = query.query
     query_answer, first_product = await show_products_inline(query_text, state)
     await state.update_data(product_data={

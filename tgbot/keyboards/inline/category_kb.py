@@ -9,7 +9,7 @@ async def category_keyboard():
     categories_qs = await get_parent_child()
     categories_markup = InlineKeyboardMarkup(row_width=1)
     for category in categories_qs:
-        callback_data = await navigate_callback(level=current_level + 1, category_id=category.id)
+        callback_data = navigate_callback(level=current_level + 1, category_id=category.id)
         categories_markup.insert(InlineKeyboardButton(text=f"{category.tg_name}", callback_data=callback_data))
     return categories_markup
 
@@ -24,5 +24,5 @@ async def subcategory_keyboard(category_id: int):  # accepting category_id and g
 
     subcategories_markup.row(
         InlineKeyboardButton(text="◀ Назад",
-                             callback_data=await navigate_callback(level=current_level - 1)))
+                             callback_data=navigate_callback(level=current_level - 1)))
     return subcategories_markup

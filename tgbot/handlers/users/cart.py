@@ -3,18 +3,20 @@ from pprint import pprint
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from tgbot.keyboards.inline.callback_datas import buy_callback
-from tgbot.keyboards.inline.product_kb import product_edit_kb
+from tgbot.keyboards.inline.callback_datas import buy_callback, liked_product
+from tgbot.keyboards.inline.product_kb import product_edit_kb, product_keyboard
 from tgbot.loader import dp, bot
 from tgbot.states.cart_states import ProductStates
 from decimal import Decimal
+
+from tgbot.utils.db_api.quick_commands import get_product
 
 
 @dp.callback_query_handler(buy_callback.filter(edit="False", add="False", reduce="False"))
 async def add_to_cart(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     product_price = callback_data.get("product_price")
     product_id = callback_data.get("product_id")
-    total = 1 * Decimal(product_price)
+    total = Decimal(product_price)
     products = {
         product_id:
             {
@@ -75,34 +77,61 @@ async def accept_product_quantity(message: types.Message, state: FSMContext):
         quantity = int(message.text)
         inline_message_id = state_data.get("message_data")["inline_message_id"]
         products_list = state_data.get("products")
-        product_price = products_list[state_data.get("product_id")]['price']
         products_list[state_data.get("product_id")]['quantity'] = quantity
-        products_list[state_data.get("product_id")]['total'] = float(quantity * Decimal(product_price))
-
+        products_list[state_data.get("product_id")]['total'] = product_total_price(state_data)
         await bot.edit_message_reply_markup(inline_message_id=inline_message_id,
                                             reply_markup=product_edit_kb(data=state_data,
                                                                          product_id=state_data.get('product_id')))
-    await message.answer("fuck you")
-    # pprint(await state.get_data())
+        del state_data['message_data']
+    pprint(await state.get_data())
     await state.reset_state(with_data=False)
 
 
 @dp.callback_query_handler(buy_callback.filter(edit="True", add="True"))
 @dp.callback_query_handler(buy_callback.filter(edit="True", reduce="True"))
 async def plus_one_quantity(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    product_id = callback_data.get("product_id")
     async with state.proxy() as state_data:
         products_list = state_data.get("products")
-        product_quantity = products_list[callback_data.get("product_id")]['quantity']
+        product_quantity = products_list[product_id]['quantity']
         if product_quantity == 0 and callback_data.get("reduce") == "True":
             return
         elif callback_data.get("reduce") == "True":
-            products_list[callback_data.get("product_id")]['quantity'] -= 1
+            products_list[product_id]['quantity'] -= 1
             await call.answer(text="Удалено из корзины")
         elif callback_data.get("add") == "True":
-            products_list[callback_data.get("product_id")]['quantity'] += 1
+            products_list[product_id]['quantity'] += 1
             await call.answer(text="Добавлено в корзину")
-
+        products_list[state_data.get("product_id")]['total'] = product_total_price(state_data)
     await bot.edit_message_reply_markup(inline_message_id=call["inline_message_id"],
-                                        reply_markup=product_edit_kb(data=state_data,
-                                                                     product_id=callback_data.get("product_id")))
+                                        reply_markup=product_edit_kb(data=state_data, product_id=product_id))
+    pprint(await state.get_data())
+
+
+def product_total_price(state_data: dict):
+    products_list = state_data.get("products")
+    return float(products_list[state_data.get("product_id")]['quantity'] * Decimal(
+        products_list[state_data.get("product_id")]['price']))
+
+
+@dp.callback_query_handler(liked_product.filter())
+async def add_liked(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    product = await get_product(int(callback_data.get("product_id")))
+    async with state.proxy() as state_data:
+        if callback_data.get("delete") == "False":
+            await call.answer("Добавлено в избранное", cache_time=0)
+            state_data["liked_products"].append(callback_data.get("product_id"))
+        elif callback_data.get("add") == "False":
+            await call.answer("Удалено из избранных", cache_time=0)
+            for count, value in enumerate(state_data['liked_products']):
+                if value == callback_data.get("product_id"):
+                    del state_data["liked_products"][count]
+    markup = await product_keyboard(product_id=callback_data.get("product_id"),
+                                    product_title=product.title,
+                                    tg_name=product.parent.tg_name,
+                                    product_price=product.price,
+                                    category_id=product.parent.category_id,
+                                    state=state)
+    await bot.edit_message_reply_markup(inline_message_id=call["inline_message_id"], reply_markup=markup)
+    await call.answer(cache_time=0)
     pprint(await state.get_data())
