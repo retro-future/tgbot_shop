@@ -1,5 +1,8 @@
 import logging
+from pprint import pprint
 from typing import Union
+
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 from aiogram import types
 from aiogram.types import CallbackQuery, InputFile
@@ -16,13 +19,17 @@ async def show_menu(message: types.Message):
 
 
 @dp.message_handler(text="🛍 Товары")
-async def delegate_to_categories(message: types.Message):
-    await show_category(message)
+async def delegate_to_categories(message: types.Message, state: FSMContext):
+    await show_category(message, state=state)
 
 
 async def show_category(message: Union[types.Message, types.CallbackQuery], **kwargs):
-    markup = await category_keyboard()
-
+    state_data = await kwargs['state'].get_data()
+    if not state_data['liked_products']:
+        markup = await category_keyboard()
+    else:
+        quantity = len(state_data['liked_products'])
+        markup = await category_keyboard(has_liked_products=True, liked_products_quantity=quantity)
     if isinstance(message, types.Message):
         await message.answer("Смотри, что у нас есть", reply_markup=markup)
     elif isinstance(message, types.CallbackQuery):
@@ -45,11 +52,10 @@ async def show_subcategory(call: CallbackQuery, category_id, **kwargs):
 
 
 @dp.callback_query_handler(multi_menu.filter())
-async def navigate(call: types.CallbackQuery, callback_data: dict):
+async def navigate(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     current_level = callback_data.get("level")
     category = callback_data.get("category_id")
     subcategory = callback_data.get("subcategory_id")
-    item_id = callback_data.get("item_id")
 
     levels = {
         "0": show_category,
@@ -60,9 +66,9 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
 
     await current_level_function(
         call,
+        state=state,
         category_id=category,
         subcategory=subcategory,
-        item_id=item_id
     )
 
 

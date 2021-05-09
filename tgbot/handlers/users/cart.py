@@ -9,7 +9,7 @@ from tgbot.loader import dp, bot
 from tgbot.states.cart_states import ProductStates
 from decimal import Decimal
 
-from tgbot.utils.db_api.quick_commands import get_product
+from tgbot.utils.db_api.quick_commands import get_product, get_current_state
 
 
 @dp.callback_query_handler(buy_callback.filter(edit="False", add="False", reduce="False"))
@@ -28,15 +28,15 @@ async def add_to_cart(call: types.CallbackQuery, callback_data: dict, state: FSM
     async with state.proxy() as state_data:
         if not state_data.get("products"):
             state_data["products"] = products
+        elif product_id not in state_data["products"].keys():
+            state_data["products"].update(products)
         else:
-            try:
-                state_data["products"][product_id]["quantity"] += 1
-            except KeyError:
-                state_data["products"].update(products)
-    markup = product_edit_kb(state_data, product_id)
+            state_data["products"][product_id]["quantity"] += 1
+    markup = product_edit_kb(state_data, product_id, callback_data.get("liked"))
     await state.update_data(product_id=product_id)
     print("=" * 100)
     pprint(await state.get_data())
+    pprint(await get_current_state())
     await bot.edit_message_reply_markup(inline_message_id=call.inline_message_id,
                                         reply_markup=markup)
 
@@ -133,5 +133,4 @@ async def add_liked(call: types.CallbackQuery, callback_data: dict, state: FSMCo
                                     category_id=product.parent.category_id,
                                     state=state)
     await bot.edit_message_reply_markup(inline_message_id=call["inline_message_id"], reply_markup=markup)
-    await call.answer(cache_time=0)
     pprint(await state.get_data())
