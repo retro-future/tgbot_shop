@@ -17,12 +17,14 @@ async def add_to_cart(call: types.CallbackQuery, callback_data: dict, state: FSM
     product_price = callback_data.get("product_price")
     product_id = callback_data.get("product_id")
     total = Decimal(product_price)
+    is_liked = callback_data.get("liked")
     products = {
         product_id:
             {
                 "quantity": 1,
                 "price": product_price,
-                "total": float(total)
+                "total": float(total),
+                "is_liked": is_liked
             },
     }
     async with state.proxy() as state_data:
@@ -32,8 +34,12 @@ async def add_to_cart(call: types.CallbackQuery, callback_data: dict, state: FSM
             state_data["products"].update(products)
         else:
             state_data["products"][product_id]["quantity"] += 1
-    markup = product_edit_kb(state_data, product_id, callback_data.get("liked"))
-    await state.update_data(product_id=product_id)
+            state_data[product_id] = product_id
+            state_data["products"][product_id]["total"] = product_total_price(state_data=state_data)
+            state_data["products"][product_id]["is_liked"] = is_liked
+
+    # await state.update_data(product_id=product_id)
+    markup = product_edit_kb(state_data, product_id, is_liked)
     print("=" * 100)
     pprint(await state.get_data())
     pprint(await get_current_state())
@@ -79,9 +85,11 @@ async def accept_product_quantity(message: types.Message, state: FSMContext):
         products_list = state_data.get("products")
         products_list[state_data.get("product_id")]['quantity'] = quantity
         products_list[state_data.get("product_id")]['total'] = product_total_price(state_data)
+        is_liked = products_list[state_data.get("product_id")]['is_liked']
         await bot.edit_message_reply_markup(inline_message_id=inline_message_id,
                                             reply_markup=product_edit_kb(data=state_data,
-                                                                         product_id=state_data.get('product_id')))
+                                                                         product_id=state_data.get('product_id'),
+                                                                         liked=is_liked))
         del state_data['message_data']
     pprint(await state.get_data())
     await state.reset_state(with_data=False)
@@ -94,6 +102,7 @@ async def plus_one_quantity(call: types.CallbackQuery, callback_data: dict, stat
     async with state.proxy() as state_data:
         products_list = state_data.get("products")
         product_quantity = products_list[product_id]['quantity']
+        is_liked = products_list[product_id]['is_liked']
         if product_quantity == 0 and callback_data.get("reduce") == "True":
             return
         elif callback_data.get("reduce") == "True":
@@ -104,7 +113,8 @@ async def plus_one_quantity(call: types.CallbackQuery, callback_data: dict, stat
             await call.answer(text="Добавлено в корзину")
         products_list[state_data.get("product_id")]['total'] = product_total_price(state_data)
     await bot.edit_message_reply_markup(inline_message_id=call["inline_message_id"],
-                                        reply_markup=product_edit_kb(data=state_data, product_id=product_id))
+                                        reply_markup=product_edit_kb(data=state_data, product_id=product_id,
+                                                                     liked=is_liked))
     pprint(await state.get_data())
 
 

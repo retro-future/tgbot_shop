@@ -30,7 +30,8 @@ async def product_keyboard(product_id: str, product_title: str, tg_name: str, pr
 
     markup.insert(InlineKeyboardButton(text=product_name, callback_data=callback_data))
     markup.add(InlineKeyboardButton(text=text, callback_data=liked_callback))
-    markup.insert(InlineKeyboardButton(text="🛒" + str(total_func(state_data["products"])), callback_data=callback_data))
+    markup.insert(InlineKeyboardButton(text="🛒 " + str(total_func(state_data["products"])) + "$",
+                                       callback_data=callback_data))
     markup.add(InlineKeyboardButton(text="◀ Назад", callback_data=navigate_callback(level=1,
                                                                                     category_id=category_id)))
     markup.insert(InlineKeyboardButton(text="Еще " + another_text, switch_inline_query_current_chat=another_text))
