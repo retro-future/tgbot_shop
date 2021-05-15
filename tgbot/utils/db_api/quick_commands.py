@@ -5,14 +5,12 @@ from aiogram.dispatcher import FSMContext
 from tgbot.data import config
 import asyncio
 
+from tgbot.keyboards.inline.gen_keyboard import director, builder
 from tgbot.keyboards.inline.product_kb import product_keyboard
 from tgbot.loader import dp
 from tgbot.utils.db_api.db_gino import db
 from tgbot.utils.db_api.schemas.goods import Subcategory, Category, Product
 
-
-async def get_current_state():
-    return await dp.current_state().get_data()
 
 async def get_parent_child():  # get child model with children attribute
     query = Subcategory.outerjoin(Category).select()
@@ -34,17 +32,23 @@ async def get_product(product_id: int):
     return result
 
 
-async def get_product_inline(liked_products_id: list, state: FSMContext):
+async def get_liked_product(liked_products_id: list, state: FSMContext):
     query_answer = []
     async with db.transaction():
         for product_id in liked_products_id:
             db_query = Product.load(parent=Subcategory)
             product = await db_query.where(Product.id == int(product_id)).gino.first()
-            subcategory_name = product.parent.tg_name
-            category_id = product.parent.category_id
-            markup = await product_keyboard(str(product.id), product.title, subcategory_name, product.price,
-                                            category_id,
-                                            state=state, liked=True)
+            async with state.proxy() as state_data:
+                state_data["product_info"] = {
+                    "product_id": product.id,
+                    "product_title": product.title,
+                    "product_price": float(product.price),
+                    "category_id": product.parent.category_id,
+                    "subcategory_name": product.parent.tg_name,
+                    "is_liked": 1
+                }
+                director.build_product_kb(state_data)
+                markup = builder.product.get_keyboard()
             query_answer.append(
                 types.InlineQueryResultArticle(
                     id=str(product.id),
@@ -68,8 +72,19 @@ async def show_products_inline(subcategory_title: str, state: FSMContext):
     for product in result:
         subcategory_name = product.parent.tg_name
         category_id = product.parent.category_id
-        markup = await product_keyboard(str(product.id), product.title, subcategory_name, product.price, category_id,
-                                        state=state)
+        # markup = await product_keyboard(str(product.id), product.title, subcategory_name, product.price, category_id,
+        #                                 state=state)
+        async with state.proxy() as state_data:
+            state_data["product_info"] = {
+                "product_id": product.id,
+                "product_title": product.title,
+                "product_price": float(product.price),
+                "category_id": product.parent.category_id,
+                "subcategory_name": product.parent.tg_name,
+                "is_liked": 0
+            }
+            director.build_product_kb(state_data)
+            markup = builder.product.get_keyboard()
         query_answer.append(
             types.InlineQueryResultArticle(
                 id=str(product.id),

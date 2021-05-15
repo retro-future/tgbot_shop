@@ -46,10 +46,13 @@ class Product(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        image_bytes = self.image.read()
-        link = asyncio.run(photo_link(image_bytes))
-        self.image = link
-        super(Product, self).save(*args, *kwargs)
+        if self.image:
+            super(Product, self).save(*args, *kwargs)
+        else:
+            image_bytes = self.image.read()
+            link = asyncio.run(photo_link(image_bytes))
+            self.image = link
+            super(Product, self).save(*args, *kwargs)
 
     class Meta:
         verbose_name = "Товар"
