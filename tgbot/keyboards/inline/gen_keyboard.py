@@ -18,7 +18,6 @@ class ProductInlineKeyboard:
     def get_keyboard(self) -> InlineKeyboardMarkup:
         return self.keyboard
 
-
 class Builder(ABC):
 
     @property
@@ -70,30 +69,30 @@ class KeyboardBuilder(Builder):
 
     def set_data(self, data: dict):
         self._data = data
-        self.product_id = str(data["product_info"]["product_id"])
-        self.product_title = data["product_info"]["product_title"]
-        self.product_price = data["product_info"]["product_price"]
-        self.category_id = data["product_info"]["category_id"]
-        self.subcategory_name = data["product_info"]["subcategory_name"]
+        self.product_id = str(data["product_info"].pop("product_id"))
+        self.product_title = data["product_info"].pop("product_title")
+        self.product_price = data["product_info"].pop("product_price")
+        self.category_id = data["product_info"].pop("category_id")
+        self.subcategory_name = data["product_info"].pop("subcategory_name")
         self.liked_product = data["product_info"]["is_liked"]
 
-    def total_func(self, product_list: dict):
+    def cart_total_price(self, product_list: dict):
         total = 0
         for key in product_list.keys():
             price = product_list[key]["price"]
             quantity = product_list[key]["quantity"]
-            total += (Decimal(price) * quantity)
+            total += Decimal(price) * quantity
         return total
 
     def produce_buy_button(self) -> None:
         callback_data = gen_buy_callback(product_id=self.product_id, product_price=self.product_price,
                                          category_id=self.category_id)
-        if self.product_id not in self._data["products"].keys():
-            product_name = "Купить " + f'"{self.product_title}"' + "  " + str(self.product_price) + "$"
+        if self.product_id not in self._data["products"].keys() or \
+                self._data['products'][self.product_id]["quantity"] == 0:
+            product_name = "Купить " + f'"{self.product_title}"' + "  " + self.product_price + "$"
         else:
             quantity = self._data["products"][self.product_id]["quantity"]
-            product_name = f"{quantity} шт. | " + "Купить " + f'"{self.product_title}"' + "  " + str(
-                self.product_price) + "$"
+            product_name = f"{quantity} шт. | " + "Купить " + f'"{self.product_title}"' + "  " + self.product_price + "$"
         self._inlinekb.insert(InlineKeyboardButton(text=product_name, callback_data=callback_data))
 
     def produce_edit_button(self) -> None:
@@ -103,8 +102,9 @@ class KeyboardBuilder(Builder):
         self._inlinekb.insert(InlineKeyboardButton(text="✏" + str(quantity) + "шт.",
                                                    callback_data=gen_edit_callback(product_id=self.product_id,
                                                                                    edit=True)))
-        self._inlinekb.insert(InlineKeyboardButton(text="+1", callback_data=gen_edit_callback(product_id=self.product_id,
-                                                                                              add=True, edit=True)))
+        self._inlinekb.insert(
+            InlineKeyboardButton(text="+1", callback_data=gen_edit_callback(product_id=self.product_id,
+                                                                            add=True, edit=True)))
 
     def produce_like_button(self) -> None:
         if self.product_id not in self._data['liked_products']:
@@ -116,8 +116,9 @@ class KeyboardBuilder(Builder):
         self._inlinekb.add(InlineKeyboardButton(text=text, callback_data=liked_callback))
 
     def produce_cart_button(self) -> None:
-        self._inlinekb.insert(InlineKeyboardButton(text="🛒 " + str(self.total_func(self._data["products"])) + "$",
-                                                   callback_data="show_cart"))
+        self._inlinekb.insert(
+            InlineKeyboardButton(text="🛒 " + str(self.cart_total_price(self._data["products"])) + "$",
+                                 callback_data="show_cart"))
 
     def produce_again_button(self) -> None:
         again_text = self.subcategory_name if not bool(self.liked_product) else "💘 Избранное"
@@ -161,3 +162,31 @@ class Director:
 director = Director()
 builder = KeyboardBuilder()
 director.builder = builder
+
+#  =================Cart Edit KB ===================
+cart_edit_kb = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
+    [
+        InlineKeyboardButton(text="✏ Редактировать", callback_data="edit_cart"),
+        InlineKeyboardButton(text="❌ Очистить", callback_data="wipe_cart")
+    ],
+    [
+        InlineKeyboardButton(text="✅  Оформить заказ", callback_data="order")
+    ]
+])
+
+
+#  ==================================================
+
+
+# class ProductEditKB:
+#     def __init__(self, data):
+#         self.keyboard = InlineKeyboardMarkup(row_width=3)
+#         self._data = data
+#         self.product_id = str(data["product_info"].pop("product_id"))
+#         self.product_title = data["product_info"].pop("product_title")
+#         self.product_price = data["product_info"].pop("product_price")
+#         self.category_id = data["product_info"].pop("category_id")
+#         self.subcategory_name = data["product_info"].pop("subcategory_name")
+# 
+# 
+#     def produce_edit_button(self):

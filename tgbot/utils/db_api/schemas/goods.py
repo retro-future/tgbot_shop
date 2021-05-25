@@ -21,7 +21,7 @@ class Category(BaseModel):
         return self._children
 
     @children.setter
-    def add_child(self, child):
+    def children(self, child):
         self._children.add(child)
 
 

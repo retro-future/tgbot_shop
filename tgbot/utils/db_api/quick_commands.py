@@ -6,15 +6,13 @@ from tgbot.data import config
 import asyncio
 
 from tgbot.keyboards.inline.gen_keyboard import director, builder
-from tgbot.keyboards.inline.product_kb import product_keyboard
-from tgbot.loader import dp
 from tgbot.utils.db_api.db_gino import db
 from tgbot.utils.db_api.schemas.goods import Subcategory, Category, Product
 
 
 async def get_parent_child():  # get child model with children attribute
     query = Subcategory.outerjoin(Category).select()
-    parent = await query.gino.load(Category.distinct(Category.id).load(add_child=Subcategory)).all()
+    parent = await query.gino.load(Category.distinct(Category.id).load(children=Subcategory)).all()
     return parent
 
 
@@ -42,7 +40,7 @@ async def get_liked_product(liked_products_id: list, state: FSMContext):
                 state_data["product_info"] = {
                     "product_id": product.id,
                     "product_title": product.title,
-                    "product_price": float(product.price),
+                    "product_price": str(product.price),
                     "category_id": product.parent.category_id,
                     "subcategory_name": product.parent.tg_name,
                     "is_liked": 1
@@ -78,7 +76,7 @@ async def show_products_inline(subcategory_title: str, state: FSMContext):
             state_data["product_info"] = {
                 "product_id": product.id,
                 "product_title": product.title,
-                "product_price": float(product.price),
+                "product_price": str(product.price),
                 "category_id": product.parent.category_id,
                 "subcategory_name": product.parent.tg_name,
                 "is_liked": 0
@@ -110,7 +108,7 @@ async def test():
     db.bind = engine
     result = await get_parent_child()
     for i in result:
-        print(i)
+        print(i.children)
 
 
 if __name__ == "__main__":
