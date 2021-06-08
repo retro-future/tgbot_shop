@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InputMediaPhoto
 
-from tgbot.handlers.users.cart import product_total_price
+from tgbot.handlers.users.cart import product_total_price, show_cart
 from tgbot.keyboards.inline.callback_datas import pagination_callback, pagination_edit_callback
 from tgbot.keyboards.inline.gen_keyboard import CartKeyboardGen
 from tgbot.loader import dp, bot
@@ -69,37 +69,6 @@ async def accept_quantity(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
 
 
-# @dp.callback_query_handler(pagination_edit_callback.filter(add="True", reduce="False"))
-# @dp.callback_query_handler(pagination_edit_callback.filter(add="False", reduce="True"))
-# async def add_and_reduce(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
-#     page = int(callback_data.get("page"))
-#     product_id = callback_data.get("product_id")
-#     async with state.proxy() as state_data:
-#         product = state_data['products'][product_id]
-#         if product['quantity'] == 1 and callback_data.get("reduce") == "True":
-#             del state_data['products'][product_id]
-#             if not state_data['products']:
-#                 await call.message.delete()
-#                 await call.message.answer("Корзина Пуста")
-#                 return
-#         elif callback_data.get("reduce") == "True":
-#             state_data["products"][product_id]['quantity'] -= 1
-#         elif callback_data.get("add") == "True":
-#             state_data["products"][product_id]['quantity'] += 1
-#         product_id = indexed_product_id(page=page, state_data=state_data)
-#         state_data['product_id'] = product_id
-#         product['total'] = product_total_price(state_data)
-#         product_db = await get_product(product_id=int(product_id))
-#         cart_product = state_data['products'][product_id]
-#         caption = cart_product['title'] + "\n\n" + str(cart_product['quantity']) + " шт. x $" + cart_product['price'] \
-#                   + " = $" + cart_product['total']
-#         product_image = InputMediaPhoto(product_db.image, caption=caption)
-#         keyboard = CartKeyboardGen(page=page, data=state_data)
-#         markup = keyboard.build_edit_keyboard()
-#         await call.message.edit_media(media=product_image, reply_markup=markup)
-#         await call.answer("Успешно")
-
-
 @dp.callback_query_handler(pagination_edit_callback.filter(reduce="True"))
 async def reduce_quantity(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     page = int(callback_data.get("page"))
@@ -143,3 +112,10 @@ async def add_quantity(call: types.CallbackQuery, callback_data: dict, state: FS
         markup = CartKeyboardGen(page=page, data=state_data).build_edit_keyboard()
         await call.message.edit_media(media=product_image, reply_markup=markup)
         await call.answer("Успешно")
+
+
+@dp.callback_query_handler(text="end_edit")
+async def end_editing(call: types.CallbackQuery, state: FSMContext):
+    await bot.delete_message(call.from_user.id, call.message.message_id)
+    await show_cart(call=call, state=state)
+    await call.answer()

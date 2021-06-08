@@ -230,7 +230,7 @@ class CartKeyboardGen:
         self.keyboard.insert(button)
 
     def produce_end_editing(self):
-        self.keyboard.add(InlineKeyboardButton(text="✅ Завершить редактирование", callback_data="test"))
+        self.keyboard.add(InlineKeyboardButton(text="✅ Завершить редактирование", callback_data="end_edit"))
 
     def build_pagination_keyboard(self) -> InlineKeyboardMarkup:
         self.produce_edit_button()

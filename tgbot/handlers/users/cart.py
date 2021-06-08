@@ -168,3 +168,5 @@ async def edit_cart(call: types.CallbackQuery, state: FSMContext):
         caption = cart_product['title'] + "\n\n" + str(cart_product['quantity']) + " шт. x $" + cart_product['price'] \
                   + " = $" + cart_product['total']
     await call.message.answer_photo(photo=product.image, caption=caption, reply_markup=markup)
+    await bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
+    await call.answer()
