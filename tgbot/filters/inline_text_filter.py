@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
 
 from tgbot.loader import dp
-from tgbot.utils.db_api.quick_commands import show_all_subcategory, get_product
+from tgbot.utils.db_api.quick_commands import show_all_subcategory
 
 
 class IsSubcategoryName(BoundFilter):
