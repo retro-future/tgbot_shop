@@ -9,7 +9,9 @@ from aiogram.types import CallbackQuery, InputFile
 from tgbot.keyboards.default.menu_kb import menu
 from tgbot.keyboards.inline.callback_datas import multi_menu
 from tgbot.keyboards.inline.category_kb import category_keyboard, subcategory_keyboard
+from tgbot.keyboards.inline.gen_keyboard import cart_edit_kb
 from tgbot.loader import dp, bot
+from tgbot.utils.cart_product_utils import create_cart_list
 
 
 @dp.message_handler(Command("menu"))
@@ -21,6 +23,16 @@ async def show_menu(message: types.Message):
 @dp.message_handler(text="🛍 Товары")
 async def delegate_to_categories(message: types.Message, state: FSMContext):
     await show_category(message, state=state)
+
+
+@dp.message_handler(text="🛒 Корзина")
+async def show_cart_menu(message: types.Message, state: FSMContext):
+    async with state.proxy() as state_data:
+        if not state_data.get("products"):
+            await message.answer("Корзина Пуста")
+            return
+    answer = await create_cart_list(state)
+    await message.answer(text=answer, reply_markup=cart_edit_kb)
 
 
 async def show_category(message: Union[types.Message, types.CallbackQuery], **kwargs):

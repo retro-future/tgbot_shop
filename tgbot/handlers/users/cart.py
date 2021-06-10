@@ -9,6 +9,7 @@ from tgbot.loader import dp, bot
 from tgbot.states.cart_states import ProductStates
 from decimal import Decimal
 
+from tgbot.utils.cart_product_utils import create_cart_list, check_quantity
 from tgbot.utils.db_api.quick_commands import get_product
 
 
@@ -71,6 +72,8 @@ async def edit_product_quantity(call: types.CallbackQuery, callback_data: dict, 
 
 @dp.message_handler(state=ProductStates.QUANTITY_EDIT)
 async def accept_product_quantity(message: types.Message, state: FSMContext):
+    if not await check_quantity(message=message):
+        return
     async with state.proxy() as state_data:
         quantity = int(message.text)
         product_id = state_data.get("product_id")
@@ -83,6 +86,7 @@ async def accept_product_quantity(message: types.Message, state: FSMContext):
         await bot.edit_message_reply_markup(inline_message_id=inline_message_id, reply_markup=markup)
         del state_data['message_data']
     pprint(await state.get_data())
+    await message.answer("Успешно")
     await state.reset_state(with_data=False)
 
 
@@ -132,19 +136,11 @@ async def add_liked(call: types.CallbackQuery, callback_data: dict, state: FSMCo
 
 @dp.callback_query_handler(text='show_cart')
 async def show_cart(call: types.CallbackQuery, state: FSMContext):
-    answer_texts = []
-    total = 0
     async with state.proxy() as state_data:
-        if not state_data["products"]:
+        if not state_data.get("products"):
             await call.answer("Корзина Пуста")
             return
-        for product_id in state_data['products'].keys():
-            product = state_data['products'].get(product_id)
-            text = f"<b>{product['title']}</b>\n{product['quantity']} шт. x ${product['price']} = ${product['total']}\n"
-            answer_texts.append(text)
-            total += Decimal(product['total'])
-    text = "\n".join(answer_texts)
-    answer = "<b>Корзина</b>\n\n" + "----------\n" + f"{text}" + "----------\n\n" + f"<b>Итого</b>: <i>{total}$</i>"
+    answer = await create_cart_list(state)
     await call.answer()
     await bot.send_message(chat_id=call.from_user.id, text=answer, reply_markup=cart_edit_kb)
 

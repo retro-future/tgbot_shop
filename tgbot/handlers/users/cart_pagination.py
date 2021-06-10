@@ -7,6 +7,7 @@ from tgbot.keyboards.inline.callback_datas import pagination_callback, paginatio
 from tgbot.keyboards.inline.gen_keyboard import CartKeyboardGen
 from tgbot.loader import dp, bot
 from tgbot.states.cart_states import PaginationStates
+from tgbot.utils.cart_product_utils import check_quantity
 from tgbot.utils.db_api.quick_commands import get_product
 
 
@@ -49,7 +50,8 @@ async def edit_quantity(call: types.CallbackQuery, callback_data: dict, state: F
 
 @dp.message_handler(state=PaginationStates.QUANTITY_EDIT)
 async def accept_quantity(message: types.Message, state: FSMContext):
-    print("hello world")
+    if not await check_quantity(message=message):
+        return
     quantity = int(message.text)
     async with state.proxy() as state_data:
         product_id = state_data.get("product_id")
@@ -67,6 +69,7 @@ async def accept_quantity(message: types.Message, state: FSMContext):
                                        reply_markup=markup)
         del state_data['message_data'], state_data['page']
     await state.reset_state(with_data=False)
+    await message.answer("Успешно")
 
 
 @dp.callback_query_handler(pagination_edit_callback.filter(reduce="True"))
