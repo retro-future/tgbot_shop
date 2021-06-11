@@ -8,9 +8,14 @@ from tgbot.utils.db_api.quick_commands import show_products_inline, get_liked_pr
 
 @dp.inline_handler(IsSubcategoryName(), regexp="^.{4,}")
 async def inline_products(query: types.InlineQuery, state: FSMContext):
+    if query.offset:
+        offset = int(query.offset)
+    else:
+        offset = 0
     query_text = query.query
-    query_answer, first_product = await show_products_inline(query_text, state)
-    await query.answer(results=query_answer, cache_time=0)
+    query_answer = await show_products_inline(query_text, state, offset=offset)
+    next_offset = offset + 25
+    await query.answer(results=query_answer, cache_time=0, next_offset=str(next_offset))
 
 
 @dp.inline_handler(text="💘 Избранное")

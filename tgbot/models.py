@@ -1,6 +1,5 @@
 from django.db import models
-import asyncio
-from tgbot.utils.get_link_or_id import get_file_id, photo_link
+from tgbot.utils.get_link_or_id import get_photo_link
 
 
 class Category(models.Model):
@@ -46,13 +45,13 @@ class Product(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        if self.image:
-            super(Product, self).save(*args, *kwargs)
-        else:
+        try:
             image_bytes = self.image.read()
-            link = asyncio.run(photo_link(image_bytes))
+            link = get_photo_link(image_bytes)
             self.image = link
-            super(Product, self).save(*args, *kwargs)
+            super(Product, self).save(*args, **kwargs)
+        except Exception as e:
+            super(Product, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Товар"

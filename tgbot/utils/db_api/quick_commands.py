@@ -37,16 +37,6 @@ async def get_liked_product(liked_products_id: list, state: FSMContext):
             db_query = Product.load(parent=Subcategory)
             product = await db_query.where(Product.id == product_id).gino.first()
             async with state.proxy() as state_data:
-                # state_data["product_info"] = {
-                #     "product_id": product.id,
-                #     "product_title": product.title,
-                #     "product_price": str(product.price),
-                #     "category_id": product.parent.category_id,
-                #     "subcategory_name": product.parent.tg_name,
-                #     "is_liked": 1
-                # }
-                # director.build_product_kb(state_data)
-                # markup = builder.product.get_keyboard()
                 state_data["product_info"] = {"is_liked": 1}
                 keyboard = KeyboardGen(product=product, data=state_data)
                 markup = keyboard.build_product_kb()
@@ -65,23 +55,15 @@ async def get_liked_product(liked_products_id: list, state: FSMContext):
     return query_answer
 
 
-async def show_products_inline(subcategory_title: str, state: FSMContext):
+async def show_products_inline(subcategory_title: str, state: FSMContext, offset: int):
+    start = offset
+    end = offset + 25
     query_answer = []
     async with db.transaction():
         query = Product.load(parent=Subcategory).where(Subcategory.tg_name == subcategory_title)
         result = await query.gino.all()
-    for product in result:
+    for product in result[start:end]:
         async with state.proxy() as state_data:
-            # state_data["product_info"] = {
-            #     "product_id": product.id,
-            #     "product_title": product.title,
-            #     "product_price": str(product.price),
-            #     "category_id": product.parent.category_id,
-            #     "subcategory_name": product.parent.tg_name,
-            #     "is_liked": 0
-            # }
-            # director.build_product_kb(state_data)
-            # markup = builder.product.get_keyboard()
             state_data["product_info"] = {"is_liked": 0}
             keyboard = KeyboardGen(product=product, data=state_data)
             markup = keyboard.build_product_kb()
@@ -93,11 +75,11 @@ async def show_products_inline(subcategory_title: str, state: FSMContext):
                     message_text=f"<a href='{product.image}'>{product.title}</a>", parse_mode="HTML"
                 ),
                 reply_markup=markup,
-                description=str(product.price),
+                description=str(product.price) + "$",
                 thumb_url=product.image,
             )
         )
-    return query_answer, result[0]
+    return query_answer
 
 
 async def show_all_subcategory():
