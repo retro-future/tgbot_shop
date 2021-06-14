@@ -50,9 +50,40 @@ class Product(models.Model):
             link = get_photo_link(image_bytes)
             self.image = link
             super(Product, self).save(*args, **kwargs)
-        except Exception as e:
+        except Exception:
             super(Product, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Товар"
         verbose_name_plural = "Товары"
+
+
+class TgUser(models.Model):
+    user_id = models.IntegerField(db_index=True, unique=True)
+    name = models.CharField(max_length=50, blank=True)
+    phone_number = models.CharField(max_length=60, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.user_id)
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+
+
+# class Orders(models.Model):
+#     is_paid = models.BooleanField(default=False)
+#     user_id = models.ForeignKey(TgUser, related_name="orders", on_delete=models.PROTECT)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#
+#
+# class OrderProduct(models.Model):
+#     order_id = models.ForeignKey(Orders, related_name="order_product", on_delete=models.CASCADE)
+#     product_id = models.ForeignKey(Product, related_name="order_product", on_delete=models.PROTECT)
+#     quantity = models.IntegerField("quantity", default=0)
+#     single_price = models.DecimalField(max_digits=10, decimal_places=2)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)

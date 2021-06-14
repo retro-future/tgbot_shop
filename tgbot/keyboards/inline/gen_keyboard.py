@@ -1,5 +1,4 @@
 from decimal import Decimal
-
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from tgbot.keyboards.inline.callback_datas import gen_buy_callback, liked_product, navigate_callback, gen_edit_callback,\
     gen_pag_edit_call, gen_pagination_callback

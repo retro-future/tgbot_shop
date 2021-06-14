@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Text, sql, ForeignKey, Boolean, VARCHAR, DECIMAL
+from sqlalchemy import Column, Integer, String, Text, sql, ForeignKey, Boolean, VARCHAR, DECIMAL, DateTime
 from tgbot.utils.db_api.db_gino import BaseModel
+from sqlalchemy.sql import func
 
 
-class Category(BaseModel):
+class CategoryGino(BaseModel):
     __tablename__ = 'tgbot_category'
     id = Column(Integer, primary_key=True)
     name = Column(String(200), index=True)
@@ -25,7 +26,7 @@ class Category(BaseModel):
         self._children.add(child)
 
 
-class Subcategory(BaseModel):
+class SubcategoryGino(BaseModel):
     __tablename__ = 'tgbot_subcategory'
     id = Column(Integer, primary_key=True)
     name = Column(String(200), index=True)
@@ -35,7 +36,7 @@ class Subcategory(BaseModel):
     category_id = Column(Integer, ForeignKey('tgbot_category.id'))
 
 
-class Product(BaseModel):
+class ProductGino(BaseModel):
     __tablename__ = 'tgbot_product'
     id = Column(Integer, primary_key=True)
     title = Column(VARCHAR(150), index=True)
@@ -45,3 +46,13 @@ class Product(BaseModel):
     image = Column(VARCHAR(100))
     image_file_id = Column(VARCHAR(200), index=True)
     subcategory_id = Column(Integer, ForeignKey('tgbot_subcategory.id'))
+
+
+class TgUserGino(BaseModel):
+    __tablename__ = 'tgbot_tguser'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, index=True, unique=True)
+    name = Column(VARCHAR(50))
+    phone_number = Column(VARCHAR(60), nullable=True)
+    created_at = Column(DateTime, default=func.current_timestamp())
+    updated_at = Column(DateTime, default=func.current_timestamp(), onupdate=func.current_timestamp())
