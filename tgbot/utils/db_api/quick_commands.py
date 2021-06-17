@@ -81,7 +81,6 @@ async def get_user(user_id: int):
     return result
 
 
-
 async def show_all_subcategory():
     subcategories = await SubcategoryGino.query.gino.all()
     return subcategories
