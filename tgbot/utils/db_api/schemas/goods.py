@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, sql, ForeignKey, Boolean, VARCHAR, DECIMAL, DateTime
-from tgbot.utils.db_api.db_gino import BaseModel
+from tgbot.utils.db_api.db_gino import BaseModel, TimedBaseModel
 from sqlalchemy.sql import func
 
 
@@ -48,11 +48,32 @@ class ProductGino(BaseModel):
     subcategory_id = Column(Integer, ForeignKey('tgbot_subcategory.id'))
 
 
-class TgUserGino(BaseModel):
+class TgUserGino(TimedBaseModel):
     __tablename__ = 'tgbot_tguser'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, index=True, unique=True)
     name = Column(VARCHAR(50))
-    phone_number = Column(VARCHAR(60), nullable=True)
-    created_at = Column(DateTime, default=func.current_timestamp())
-    updated_at = Column(DateTime, default=func.current_timestamp(), onupdate=func.current_timestamp())
+
+
+class OrdersGino(TimedBaseModel):
+    __tablename__ = 'tgbot_orders'
+    id = Column(Integer, primary_key=True)
+    is_paid = Column(Boolean, default=False)
+    tg_user_id = Column(Integer, ForeignKey('tgbot_tguser.id'))
+    order_number = Column(VARCHAR(25), index=True, unique=True)
+
+
+class OrderProductGino(TimedBaseModel):
+    __tablename__ = 'tgbot_orderproduct'
+    id = Column(Integer, primary_key=True)
+    order_id = Column(Integer, ForeignKey("tgbot_orders.id"))
+    product_id = Column(Integer, ForeignKey("tgbot_product.id"))
+    quantity = Column(Integer, default=0)
+    single_price = Column(DECIMAL(precision=2, scale=10))
+
+
+class UserAddresses(TimedBaseModel):
+    __tablename__ = 'tgbot_useraddresses'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('tgbot_tguser.id'))
+    address = Column(VARCHAR(150))

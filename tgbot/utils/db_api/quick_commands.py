@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from tgbot.keyboards.inline.gen_keyboard import KeyboardGen
 from tgbot.utils.db_api.db_gino import db
-from tgbot.utils.db_api.schemas.goods import SubcategoryGino, CategoryGino, ProductGino, TgUserGino
+from tgbot.utils.db_api.schemas.goods import SubcategoryGino, CategoryGino, ProductGino, TgUserGino, OrdersGino
 
 
 async def get_parent_child():  # get child model with children attribute
@@ -84,3 +84,10 @@ async def get_user(user_id: int):
 async def show_all_subcategory():
     subcategories = await SubcategoryGino.query.gino.all()
     return subcategories
+
+
+async def get_ordered_products(order_id: int):
+    async with db.transaction():
+        query = SubcategoryGino.load(parent=OrdersGino).where(CategoryGino.id == order_id)
+        result = await query.gino.all()
+    return result

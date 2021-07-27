@@ -34,11 +34,11 @@ async def paginate_cart_products(call: types.CallbackQuery, callback_data: dict,
         markup = keyboard.build_pagination_keyboard() if edit == "False" else keyboard.build_edit_keyboard()
         product_image = InputMediaPhoto(product.image, caption=caption)
     await call.message.edit_media(media=product_image, reply_markup=markup)
+    await call.answer()
 
 
 @dp.callback_query_handler(pagination_edit_callback.filter(edit="True", add="False", reduce="False"))
 async def edit_quantity(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
-    print("hello")
     product_id = callback_data.get("product_id")
     page = int(callback_data.get("page"))
     await state.update_data(product_id=product_id)

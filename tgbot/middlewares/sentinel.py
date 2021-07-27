@@ -1,8 +1,6 @@
-from aiogram import types, Dispatcher
-from aiogram.dispatcher.handler import current_handler, CancelHandler
+from aiogram import Dispatcher
 from aiogram.dispatcher.middlewares import BaseMiddleware
-from aiogram.dispatcher.storage import BaseStorage
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message
 
 from tgbot.states.user_registration_states import RegistrationStates
 from tgbot.utils.db_api.quick_commands import get_user
@@ -27,5 +25,5 @@ class IsRegistered(BaseMiddleware):
             if not user:
                 await storage.set_state(
                     chat=chat_id, user=user_id,
-                    state=RegistrationStates.ENTER_REGISTRY
+                    state=RegistrationStates.REGISTER_USER
                 )

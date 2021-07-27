@@ -1,3 +1,4 @@
+import logging
 import re
 from pprint import pprint
 
@@ -32,28 +33,13 @@ async def get_my_state(message: types.Message, state: FSMContext):
     pprint(await state.get_data())
 
 
-@dp.message_handler(state=RegistrationStates.ENTER_REGISTRY)
+@dp.message_handler(state=RegistrationStates.REGISTER_USER)
 async def register_user(message: types.Message, state: FSMContext):
-    await message.answer(f"Здраствуйте {message.from_user.full_name}, "
-                         f"вам нужно зарегистрироваться чтобы пользоваться ботом")
-    async with state.proxy() as state_data:
-        state_data["user_info"] = {"user_id": int(message.from_user.id),
-                                   "name": message.from_user.full_name}
-
-    await message.answer("Пожалуйста введите номер телефона для регистрации")
-    await RegistrationStates.USER_PHONE.set()
-
-
-@dp.message_handler(state=RegistrationStates.USER_PHONE)
-async def register_user(message: types.Message, state: FSMContext):
-    phone_number = message.text
-    result = re.search(PHONE_NUMBER_PATTERN, phone_number)
-    if not result:
-        await message.answer("Вы неправильно ввели номер телефона, пожалуйста введите в формате: +998*********")
-        return
-    async with state.proxy() as state_data:
-        state_data["user_info"].update({"phone_number": result.group()})
-        await TgUserGino.create(**state_data["user_info"])
-        del state_data["user_info"]
+    user_id = int(message.from_user.id)
+    name = message.from_user.full_name
+    try:
+        await TgUserGino.create(user_id=user_id, name=name)
+    except Exception as err:
+        logging.exception(err)
     await state.reset_state(with_data=False)
-    await message.answer("Чтобы начать пользоваться ботом нажмите на /start")
+    await bot_start(message, state)

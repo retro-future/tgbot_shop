@@ -3,7 +3,7 @@ import gino
 from tgbot.utils.db_api.db_gino import db
 from tgbot.data import config
 from tgbot.utils.db_api.quick_commands import get_user
-from tgbot.utils.db_api.schemas.goods import TgUserGino
+from tgbot.utils.db_api.schemas.goods import TgUserGino, OrdersGino, ProductGino
 
 
 async def test():
@@ -14,8 +14,10 @@ async def test():
     #     print(i.children)
     # user = await TgUserGino.get(4)
     # await user.update(name="Ilona").apply()
+    product = await ProductGino.query.where(ProductGino.title.ilike("%xiaomi%")).gino.all()
     user = await get_user(92613407)
-    print(user)
+    for i in product:
+        print(i.title)
 
 
 if __name__ == "__main__":

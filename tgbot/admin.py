@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from tgbot.models import Category, Subcategory, Product, TgUser
+from tgbot.models import Category, Subcategory, Product, TgUser, Orders, OrderProduct, UserAddresses
 
 
 @admin.register(Category)
@@ -26,5 +26,23 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(TgUser)
 class TgUserAdmin(admin.ModelAdmin):
-    list_display = ("id", "user_id", "name", "phone_number", "created_at", "updated_at")
+    list_display = ("id", "user_id", "name", "created_at", "updated_at")
     list_display_links = ("user_id", "name")
+
+
+@admin.register(Orders)
+class OrdersAdmin(admin.ModelAdmin):
+    list_display = ("id", "tg_user", "order_number", "is_paid", "created_at", "updated_at")
+    list_display_links = ("id", "tg_user")
+
+
+@admin.register(OrderProduct)
+class OrderProductAdmin(admin.ModelAdmin):
+    list_display = ("order", "product", "quantity", "single_price")
+    list_display_links = ("order", "product")
+
+
+@admin.register(UserAddresses)
+class UserAddressesAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "address")
+    list_display_links = ("user", "address")

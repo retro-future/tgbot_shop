@@ -16,7 +16,6 @@ from tgbot.utils.cart_product_utils import create_cart_list
 
 @dp.message_handler(Command("menu"))
 async def show_menu(message: types.Message):
-    # await message.answer("Главное Меню:")
     await message.reply(text="Главное Меню:", reply_markup=menu)
 
 

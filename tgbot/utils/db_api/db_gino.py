@@ -2,7 +2,7 @@ from typing import List
 from aiogram import Dispatcher
 from gino import Gino
 import sqlalchemy as sa
-from sqlalchemy import Column, DateTime
+from sqlalchemy import Column, DateTime, func
 from tgbot.data import config
 
 db = Gino()
@@ -26,11 +26,8 @@ class BaseModel(db.Model):
 class TimedBaseModel(BaseModel):
     __abstract__ = True
 
-    created_at = Column(DateTime(True), server_default=db.func.now())
-    updated_at = Column(DateTime(True),
-                        default=db.func.now(),
-                        onupdate=db.func.now(),
-                        server_default=db.func.now())
+    created_at = Column(DateTime, default=func.current_timestamp())
+    updated_at = Column(DateTime, default=func.current_timestamp(), onupdate=func.current_timestamp())
 
 
 async def on_startup(dispatcher: Dispatcher):
