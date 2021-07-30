@@ -3,7 +3,7 @@ import gino
 from tgbot.utils.db_api.db_gino import db
 from tgbot.data import config
 from tgbot.utils.db_api.quick_commands import get_user
-from tgbot.utils.db_api.schemas.goods import TgUserGino, OrdersGino, ProductGino
+from tgbot.utils.db_api.schemas.db_tables import TgUserGino, OrdersGino, ProductGino
 
 
 async def test():

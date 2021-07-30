@@ -82,6 +82,7 @@ class Orders(TimeModel):
     is_paid = models.BooleanField(default=False)
     tg_user = models.ForeignKey(TgUser, related_name="orders", on_delete=models.PROTECT)
     order_number = models.CharField("Номер Заказа", max_length=25, db_index=True, unique=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     class Meta:
         verbose_name = "Заказ"

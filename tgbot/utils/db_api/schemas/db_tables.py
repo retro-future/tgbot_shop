@@ -61,6 +61,7 @@ class OrdersGino(TimedBaseModel):
     is_paid = Column(Boolean, default=False)
     tg_user_id = Column(Integer, ForeignKey('tgbot_tguser.id'))
     order_number = Column(VARCHAR(25), index=True, unique=True)
+    total_price = Column(DECIMAL(precision=2, scale=10))
 
 
 class OrderProductGino(TimedBaseModel):

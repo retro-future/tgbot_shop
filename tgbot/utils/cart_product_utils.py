@@ -28,3 +28,26 @@ async def check_quantity(message: types.Message) -> bool:
     except ValueError as e:
         await message.answer("Количество должно быть целым числом, повторите попытку")
         return False
+
+
+async def gen_total_price(state: FSMContext) -> Decimal:
+    async with state.proxy() as state_data:
+        product_list = state_data['products']
+        total = Decimal()
+        for key in product_list.keys():
+            price = product_list[key]["price"]
+            quantity = product_list[key]["quantity"]
+            total += Decimal(price) * quantity
+        if not total:
+            return Decimal("0.00")
+    return total
+
+
+async def wipe_cart_data(state: FSMContext, products: bool = False):
+    field_list = ['order_id', 'order_number', 'phone_number', 'user_address', 'user_db_id']
+    async with state.proxy() as state_data:
+        if products:
+            del state_data['products']
+        for field in field_list:
+            if field in state_data.keys():
+                del state_data[field]

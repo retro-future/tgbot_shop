@@ -9,7 +9,7 @@ from tgbot.loader import dp, bot
 from tgbot.states.cart_states import ProductStates
 from decimal import Decimal
 
-from tgbot.utils.cart_product_utils import create_cart_list, check_quantity
+from tgbot.utils.cart_product_utils import create_cart_list, check_quantity, wipe_cart_data
 from tgbot.utils.db_api.quick_commands import get_product
 
 
@@ -147,10 +147,10 @@ async def show_cart(call: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="wipe_cart")
 async def wipe_cart(call: types.CallbackQuery, state: FSMContext):
-    await state.update_data(products={})
-    await call.answer()
+    await wipe_cart_data(state, products=True)
     await bot.edit_message_text(text="Корзина очищено", chat_id=call.from_user.id,
                                 message_id=call.message.message_id)
+    await call.answer()
 
 
 @dp.callback_query_handler(text="edit_cart")

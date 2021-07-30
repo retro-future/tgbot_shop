@@ -9,7 +9,7 @@ from aiogram.dispatcher.filters.builtin import CommandStart
 from tgbot.keyboards.default.menu_kb import menu
 from tgbot.loader import dp, bot
 from tgbot.states.user_registration_states import RegistrationStates
-from tgbot.utils.db_api.schemas.goods import TgUserGino
+from tgbot.utils.db_api.schemas.db_tables import TgUserGino
 
 PHONE_NUMBER_PATTERN = "[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}"
 

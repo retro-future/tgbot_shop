@@ -32,7 +32,7 @@ class TgUserAdmin(admin.ModelAdmin):
 
 @admin.register(Orders)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = ("id", "tg_user", "order_number", "is_paid", "created_at", "updated_at")
+    list_display = ("id", "tg_user", "order_number", "total_price", "is_paid", "created_at", "updated_at")
     list_display_links = ("id", "tg_user")
 
 

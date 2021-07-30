@@ -2,7 +2,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from tgbot.keyboards.inline.callback_datas import user_address_callback
-from tgbot.utils.db_api.schemas.goods import UserAddresses
+from tgbot.utils.db_api.schemas.db_tables import UserAddresses
 
 
 async def generate_addresses_keyboard(state: FSMContext):
