@@ -91,3 +91,9 @@ async def get_ordered_products(order_id: int):
         query = SubcategoryGino.load(parent=OrdersGino).where(CategoryGino.id == order_id)
         result = await query.gino.all()
     return result
+
+
+async def update_order(order_id: int):
+    order = await OrdersGino.query.where(OrdersGino.id == order_id).gino.first()
+    await order.update(is_paid=True).apply()
+    return

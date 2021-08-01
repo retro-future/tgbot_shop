@@ -15,3 +15,6 @@ Database = env.str("PGDATABASE")
 db_host = IP
 
 POSTGRES_URI = f"postgresql://{PGUSER}:{PGPASSWORD}@{db_host}/{Database}"
+
+PROVIDER_TOKEN = env.str("PROVIDER_TOKEN")
+

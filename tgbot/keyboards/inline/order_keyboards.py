@@ -1,7 +1,7 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from tgbot.keyboards.inline.callback_datas import user_address_callback
+from tgbot.keyboards.inline.callback_datas import user_address_callback, shipping_callback, payment_callback
 from tgbot.utils.db_api.schemas.db_tables import UserAddresses
 
 
@@ -27,3 +27,18 @@ def gen_check_keyboard():
     ])
     return markup
 
+
+def gen_shipping_keyboard():
+    markup = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
+        [InlineKeyboardButton(text="Самовывоз", callback_data=shipping_callback.new('pickup')),
+         InlineKeyboardButton(text="Курьер", callback_data=shipping_callback.new('courier'))],
+    ])
+    return markup
+
+
+def gen_payment_keyboard():
+    markup = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
+        [InlineKeyboardButton(text="Наличные", callback_data=payment_callback.new('cash')),
+         InlineKeyboardButton(text="Карта", callback_data=payment_callback.new('card'))],
+    ])
+    return markup

@@ -11,6 +11,8 @@ pagination_callback = CallbackData("pagination", "page", "edit")
 pagination_edit_callback = CallbackData("edit_pagination", "product_id", "edit", "add", "reduce", "page")
 pagination_quantity_callback = CallbackData("pagination_quantity", "page")
 user_address_callback = CallbackData("user_address", "id", "name")
+shipping_callback = CallbackData("shipping", "name")
+payment_callback = CallbackData("payment", "name")
 
 
 def navigate_callback(level, category_id="0", subcategory_id="0", item_id="0"):
