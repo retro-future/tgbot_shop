@@ -16,13 +16,6 @@ from tgbot.utils.db_api.quick_commands import get_product
 async def update_product_info(product_id: int, state: FSMContext):
 
     async with state.proxy() as state_data:
-        # state_data["product_info"].update({
-        #     "product_id": product.id,
-        #     "product_title": product.title,
-        #     "product_price": str(product.price),
-        #     "category_id": product.parent.category_id,
-        #     "subcategory_name": product.parent.tg_name,
-        # })
         if str(product_id) not in state_data['products'].keys():
             product = await get_product(product_id)
             products = {
@@ -91,28 +84,40 @@ async def accept_product_quantity(message: types.Message, state: FSMContext):
 
 
 @dp.callback_query_handler(edit_quantity.filter(edit="True", add="True"))
+async def plus_quantity(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    product_id = callback_data.get("product_id")
+    await update_product_info(int(product_id), state)
+    async with state.proxy() as state_data:
+        state_data['product_id'] = product_id
+        products_list = state_data.get("products")
+        products_list[product_id]['quantity'] += 1
+        products_list[product_id]['total'] = product_total_price(state_data)
+        keyboard = await KeyboardGen.from_product_id(product_id=int(product_id), data=state_data)
+        markup = keyboard.build_edit_kb()
+        await call.answer(text="Добавлено в корзину")
+        await bot.edit_message_reply_markup(inline_message_id=call["inline_message_id"], reply_markup=markup)
+
+
 @dp.callback_query_handler(edit_quantity.filter(edit="True", reduce="True"))
-async def plus_one_quantity(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+async def minus_quantity(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     product_id = callback_data.get("product_id")
     await update_product_info(int(product_id), state)
     async with state.proxy() as state_data:
         state_data['product_id'] = product_id
         products_list = state_data.get("products")
         product_quantity = products_list[product_id]['quantity']
-        if product_quantity == 0 and callback_data.get("reduce") == "True":
-            await call.answer(text="У вас нету этого товара в корзине")
-            return
-        elif callback_data.get("reduce") == "True":
-            products_list[product_id]['quantity'] -= 1
-            await call.answer(text="Удалено из корзины")
-        elif callback_data.get("add") == "True":
-            products_list[product_id]['quantity'] += 1
-            await call.answer(text="Добавлено в корзину")
-        products_list[product_id]['total'] = product_total_price(state_data)
         keyboard = await KeyboardGen.from_product_id(product_id=int(product_id), data=state_data)
+        if product_quantity == 1:
+            del products_list[product_id]
+            del state_data['product_id']
+            markup = keyboard.build_product_kb()
+            await bot.edit_message_reply_markup(inline_message_id=call["inline_message_id"], reply_markup=markup)
+            return
+        products_list[product_id]['quantity'] -= 1
+        await call.answer(text="Удалено из корзины")
+        products_list[product_id]['total'] = product_total_price(state_data)
         markup = keyboard.build_edit_kb()
-    await bot.edit_message_reply_markup(inline_message_id=call["inline_message_id"],
-                                        reply_markup=markup)
+        await bot.edit_message_reply_markup(inline_message_id=call["inline_message_id"], reply_markup=markup)
     pprint(await state.get_data())
 
 

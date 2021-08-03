@@ -2,7 +2,8 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from tgbot.keyboards.inline.gen_keyboard import KeyboardGen
 from tgbot.utils.db_api.db_gino import db
-from tgbot.utils.db_api.schemas.db_tables import SubcategoryGino, CategoryGino, ProductGino, TgUserGino, OrdersGino
+from tgbot.utils.db_api.schemas.db_tables import SubcategoryGino, CategoryGino, ProductGino, TgUserGino, OrdersGino, \
+    OrderProductGino
 
 
 async def get_parent_child():  # get child model with children attribute

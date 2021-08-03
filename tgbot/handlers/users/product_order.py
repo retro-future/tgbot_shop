@@ -64,8 +64,6 @@ async def accept_address(message: Union[types.Message, types.CallbackQuery], sta
         await state.update_data(user_address=address)
         await state.reset_state(with_data=False)
         await message.answer()
-    # answer = "Почти готово! Поделитесь с нами вашим номером телефона, " \
-    #          "чтобы мы могли связаться с вами. Или напишите его ниже в формате +998**9999999"
     await bot.send_message(chat_id=chat_id, text="Чем Доставлять?", reply_markup=gen_shipping_keyboard())
     await OrderStates.Shipping.set()
 

@@ -11,8 +11,7 @@ async def create_cart_list(state: FSMContext) -> str:
         for product_id in state_data.get("products").keys():
             product = state_data['products'].get(product_id)
             text = f"<b>{product['title']}</b>\n{product['quantity']} шт. x ${product['price']} = ${product['total']}\n"
-            if product['quantity'] > 0:
-                answer_texts.append(text)
+            answer_texts.append(text)
             total += Decimal(product['total'])
         text = "\n".join(answer_texts)
         if state_data.get("courier"):
@@ -60,7 +59,3 @@ async def wipe_state_data(state: FSMContext, products: bool = False):
         for field in field_list:
             if field in state_data.keys():
                 del state_data[field]
-
-
-def concatenate_div_mod(number: Decimal):
-    return str(number).replace(".", "")

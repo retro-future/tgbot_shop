@@ -117,8 +117,7 @@ class KeyboardGen:
     def produce_buy_button(self) -> None:
         callback_data = gen_buy_callback(product_id=self.product.id, product_price=str(self.product.price),
                                          category_id=self.product.parent.category_id)
-        if str(self.product.id) not in self.data["products"].keys() or \
-                self.data['products'][str(self.product.id)]["quantity"] == 0:
+        if str(self.product.id) not in self.data["products"].keys():
             product_name = "Купить " + f'"{self.product.title}"' + "  " + str(self.product.price) + "$"
         else:
             quantity = self.data["products"][str(self.product.id)]["quantity"]
