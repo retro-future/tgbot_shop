@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Union
 from aiogram import types
 from aiogram.dispatcher import FSMContext
@@ -68,21 +69,27 @@ async def accept_address(message: Union[types.Message, types.CallbackQuery], sta
     await OrderStates.Shipping.set()
 
 
+@dp.message_handler(state=OrderStates.Shipping)
+async def delegate_to_shipping_method(message: types.Message, state: FSMContext):
+    await message.answer(text="Чем Доставлять?", reply_markup=gen_shipping_keyboard())
+
+
 @dp.callback_query_handler(shipping_callback.filter(), state=OrderStates.Shipping)
 async def shipping_method(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
-    shipping = callback_data.get("name")
-    if shipping == "courier":
-        await state.update_data(courier=True)
+    await state.update_data(shipping=callback_data.get("name"))
     await bot.send_message(call.message.chat.id, text='Как удобно оплатить?', reply_markup=gen_payment_keyboard())
     await OrderStates.Payment.set()
     await call.answer()
 
 
+@dp.message_handler(state=OrderStates.Payment)
+async def delegate_to_payment_method(message: types.Message, state: FSMContext):
+    await message.answer(text='Как удобно оплатить?', reply_markup=gen_payment_keyboard())
+
+
 @dp.callback_query_handler(payment_callback.filter(), state=OrderStates.Payment)
 async def payment_method(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
-    payment = callback_data.get("name")
-    if payment == "card":
-        await state.update_data(pay_by_card=True)
+    await state.update_data(payment=callback_data.get("name"))
     answer = "Почти готово! Поделитесь с нами вашим номером телефона, " \
              "чтобы мы могли связаться с вами. Или напишите его ниже в формате +998**9999999"
     await bot.send_message(call.message.chat.id, text=answer)
@@ -103,7 +110,8 @@ async def is_correct(chat_id: str, **kwargs):
         address = state_data["user_address"]
         phone_number = state_data['phone_number']
         cart_list = await create_cart_list(state)
-        answer = "Всё верно?\n\n" + f"{cart_list}\n\nАдрес доставки: {address}\n\nКонтакт: {phone_number}"
+        answer = "Всё верно?\n\n" + f"{cart_list}\n<b>Адрес доставки</b>: <i>{address}</i>\n" \
+                                    f"<b>Контакт</b>: <i>{phone_number}</i>"
     await bot.send_message(chat_id=chat_id, text=answer, reply_markup=gen_check_keyboard())
     await state.reset_state(with_data=False)
 
@@ -111,14 +119,13 @@ async def is_correct(chat_id: str, **kwargs):
 @dp.callback_query_handler(text="make_order")
 async def make_order(call: types.CallbackQuery, state: FSMContext):
     chat_id = call.from_user.id
-    state_data = await state.get_data()
     await create_order_db(state=state)
     await ordered_product_list(state=state)
-    if state_data.get("pay_by_card"):
+    state_data = await state.get_data()
+    if state_data.get("payment") == "card":
         await show_invoice(chat_id, state)
         await call.answer()
         return
-    state_data = await state.get_data()
     order_number = state_data.get("order_number")
     answer = f"Спасибо, номер заказа {order_number}! Наш менеджер свяжется с вами для уточнения всех деталей."
     await bot.send_message(chat_id=chat_id, text=answer)

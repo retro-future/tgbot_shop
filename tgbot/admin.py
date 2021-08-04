@@ -30,10 +30,15 @@ class TgUserAdmin(admin.ModelAdmin):
     list_display_links = ("user_id", "name")
 
 
+class OrderProductTabular(admin.TabularInline):
+    model = OrderProduct
+
+
 @admin.register(Orders)
 class OrdersAdmin(admin.ModelAdmin):
     list_display = ("id", "tg_user", "order_number", "total_price", "is_paid", "created_at", "updated_at")
-    list_display_links = ("id", "tg_user")
+    list_display_links = ("id", "order_number")
+    inlines = [OrderProductTabular]
 
 
 @admin.register(OrderProduct)

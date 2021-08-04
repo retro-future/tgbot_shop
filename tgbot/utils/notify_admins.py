@@ -23,7 +23,7 @@ async def order_notify(state: FSMContext):
         phone_number = state_data['phone_number']
         order_number = state_data['order_number']
     cart_list = await create_cart_list(state)
-    answer = f"Номер заказа: {order_number}\n\n{cart_list}\n\nАдрес доставки: {address}\n\nКонтакт: {phone_number}"
+    answer = f"Номер заказа: {order_number}\n\n{cart_list}\nАдрес доставки: {address}\nКонтакт: {phone_number}"
     for admin in ADMINS:
         try:
             await bot.send_message(admin, answer)

@@ -30,6 +30,8 @@ async def show_cart_menu(message: types.Message, state: FSMContext):
         if not state_data.get("products"):
             await message.answer("Корзина Пуста")
             return
+        if state_data.get("shipping"):
+            del state_data["shipping"]
     answer = await create_cart_list(state)
     await message.answer(text=answer, reply_markup=cart_edit_kb)
 

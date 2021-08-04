@@ -42,7 +42,7 @@ async def show_invoice(chat_id: str, state: FSMContext):
                     label=f"{product['title']}\n{product['quantity']} шт. x ${product['price']}",
                     amount=int(product['total'].replace(".", ""))
                 ))
-        if state_data.get("courier"):
+        if state_data.get("shipping") == "courier":
             labeled_price_list.append(LabeledPrice(label="Курьер", amount=5_00))
         await bot.send_invoice(chat_id=chat_id,
                                title=f"Заказ номер: {state_data.get('order_number')}",
@@ -65,7 +65,10 @@ async def payment_process(message: types.Message, state: FSMContext):
     order_id = state_data.get("order_id")
     order_number = state_data.get("order_number")
     await update_order(order_id)
-    answer = f"Спасибо, номер заказа {order_number}! Наш менеджер свяжется с вами для уточнения всех деталей."
+    print(message)
+    provider_payment_charge_id = message.successful_payment.provider_payment_charge_id
+    answer = f"Спасибо, номер заказа {order_number}! Наш менеджер свяжется с вами для уточнения всех деталей.\n" + \
+             f"ID транзакции: {provider_payment_charge_id}"
     await message.answer(answer)
     await order_notify(state)
     await wipe_state_data(state, products=True)
