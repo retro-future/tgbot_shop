@@ -1,9 +1,8 @@
 from decimal import Decimal
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from tgbot.keyboards.inline.callback_datas import gen_buy_callback, liked_product, navigate_callback, gen_edit_callback,\
+from tgbot.keyboards.inline.callback_datas import gen_buy_callback, liked_product, navigate_callback, gen_edit_callback, \
     gen_pag_edit_call, gen_pagination_callback
 from tgbot.utils.db_api import quick_commands
-
 
 #  =================Cart Edit KB ===================
 cart_edit_kb = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
@@ -21,12 +20,14 @@ cart_edit_kb = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
 
 
 class CartKeyboardGen:
-    def __init__(self,  data: dict, page: int = 1):
+    def __init__(self, data: dict, page: int = 1):
         self.keyboard = InlineKeyboardMarkup(row_width=3)
         self.data = data
+        # =============Paging on card edit====================#
         self.page = page
         self.max_page = len(data['products'].keys())
         self.idx_product_ids = dict(enumerate(data['products'].keys(), start=1))
+        # ====================================================#
         self.product_id = self.idx_product_ids[page]
         self.product = data["products"][self.product_id]
         self.quantity = self.product['quantity']
@@ -42,7 +43,8 @@ class CartKeyboardGen:
                                                                                            edit=True, reduce=True,
                                                                                            page=self.page))))
         self.keyboard.insert(InlineKeyboardButton(text=text, callback_data=gen_pag_edit_call(product_id=self.product_id,
-                                                                                             edit=True, page=self.page)))
+                                                                                             edit=True,
+                                                                                             page=self.page)))
         self.keyboard.insert(InlineKeyboardButton(text="+1", callback_data=gen_pag_edit_call(product_id=self.product_id,
                                                                                              edit=True, add=True,
                                                                                              page=self.page)))
