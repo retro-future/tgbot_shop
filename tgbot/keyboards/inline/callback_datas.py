@@ -14,6 +14,25 @@ user_address_callback = CallbackData("user_address", "id", "name")
 shipping_callback = CallbackData("shipping", "name")
 payment_callback = CallbackData("payment", "name")
 
+# Callback data that contains "product_id" argument must be added here
+CD_with_product_id = [
+    buy_callback,
+    liked_product,
+    edit_quantity,
+    pagination_edit_callback
+]
+
+
+def parse_callback(callback_data: str):
+    parsed_callback = ""
+    for callback in CD_with_product_id:
+        try:
+            parsed_callback = callback.parse(callback_data)
+            break
+        except ValueError:
+            continue
+    return parsed_callback
+
 
 def navigate_callback(level, category_id="0", subcategory_id="0", item_id="0"):
     return multi_menu.new(level=level, category_id=category_id, subcategory_id=subcategory_id, item_id=item_id)

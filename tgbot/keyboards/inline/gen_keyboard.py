@@ -42,9 +42,11 @@ class CartKeyboardGen:
         self.keyboard.add((InlineKeyboardButton(text="-1", callback_data=gen_pag_edit_call(product_id=self.product_id,
                                                                                            edit=True, reduce=True,
                                                                                            page=self.page))))
+
         self.keyboard.insert(InlineKeyboardButton(text=text, callback_data=gen_pag_edit_call(product_id=self.product_id,
                                                                                              edit=True,
                                                                                              page=self.page)))
+
         self.keyboard.insert(InlineKeyboardButton(text="+1", callback_data=gen_pag_edit_call(product_id=self.product_id,
                                                                                              edit=True, add=True,
                                                                                              page=self.page)))
@@ -102,8 +104,8 @@ class KeyboardGen:
     @classmethod
     async def from_product_id(cls, product_id: int, data: dict):
         product = await quick_commands.get_product(product_id)
-        x = cls(product=product, data=data)
-        return x
+        instance = cls(product=product, data=data)
+        return instance
 
     @staticmethod
     def cart_total_price(product_list: dict):

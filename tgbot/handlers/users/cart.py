@@ -13,22 +13,22 @@ from tgbot.utils.cart_product_utils import create_cart_list, check_quantity, wip
 from tgbot.utils.db_api.quick_commands import get_product
 
 
-async def update_product_info(product_id: int, state: FSMContext):
-
-    async with state.proxy() as state_data:
-        if str(product_id) not in state_data['products'].keys():
-            product = await get_product(product_id)
-            products = {
-                str(product.id):
-                    {
-                        "title": product.title,
-                        "quantity": 0,
-                        "price": str(product.price),
-                        "total": "0.00",
-                    },
-            }
-            state_data['products'].update(products)
-    return True
+# async def update_product_info(product_id: int, state: FSMContext):
+#
+#     async with state.proxy() as state_data:
+#         if str(product_id) not in state_data['products'].keys():
+#             product = await get_product(product_id)
+#             products = {
+#                 str(product.id):
+#                     {
+#                         "title": product.title,
+#                         "quantity": 0,
+#                         "price": str(product.price),
+#                         "total": "0.00",
+#                     },
+#             }
+#             state_data['products'].update(products)
+#     return True
 
 
 def product_total_price(state_data: dict):
@@ -41,7 +41,6 @@ def product_total_price(state_data: dict):
 @dp.callback_query_handler(buy_callback.filter())
 async def add_to_cart(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     product_id = callback_data.get("product_id")
-    await update_product_info(int(product_id), state)
     async with state.proxy() as state_data:
         state_data["product_id"] = product_id
         state_data["products"][product_id]["quantity"] += 1
@@ -56,7 +55,6 @@ async def add_to_cart(call: types.CallbackQuery, callback_data: dict, state: FSM
 @dp.callback_query_handler(edit_quantity.filter(edit="True", add="False", reduce="False"))
 async def edit_product_quantity(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     product_id = callback_data.get("product_id")
-    await update_product_info(int(product_id), state)
     await bot.send_message(chat_id=call.from_user.id, text="Введите количество товара на которую хотите изменить")
     await state.update_data(message_data=dict(call))
     await state.update_data(product_id=product_id)
@@ -86,7 +84,6 @@ async def accept_product_quantity(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(edit_quantity.filter(edit="True", add="True"))
 async def plus_quantity(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     product_id = callback_data.get("product_id")
-    await update_product_info(int(product_id), state)
     async with state.proxy() as state_data:
         state_data['product_id'] = product_id
         products_list = state_data.get("products")
@@ -101,7 +98,6 @@ async def plus_quantity(call: types.CallbackQuery, callback_data: dict, state: F
 @dp.callback_query_handler(edit_quantity.filter(edit="True", reduce="True"))
 async def minus_quantity(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     product_id = callback_data.get("product_id")
-    await update_product_info(int(product_id), state)
     async with state.proxy() as state_data:
         state_data['product_id'] = product_id
         products_list = state_data.get("products")
