@@ -15,7 +15,7 @@ shipping_callback = CallbackData("shipping", "name")
 payment_callback = CallbackData("payment", "name")
 
 # Callback data that contains "product_id" argument must be added here
-CD_with_product_id = [
+CD_WITH_PRODUCT_ID = [
     buy_callback,
     liked_product,
     edit_quantity,
@@ -25,7 +25,7 @@ CD_with_product_id = [
 
 def parse_callback(callback_data: str):
     parsed_callback = ""
-    for callback in CD_with_product_id:
+    for callback in CD_WITH_PRODUCT_ID:
         try:
             parsed_callback = callback.parse(callback_data)
             break
