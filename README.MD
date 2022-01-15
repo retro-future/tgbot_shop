@@ -53,12 +53,12 @@ How to set up the project:
 ___
 
 * Admin Dashboard
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](https://telegra.ph/file/371fa9275f855df6f2675.png)
+
+<br/>
+
+ ![](https://telegra.ph/file/371fa9275f855df6f2675.png)
 
 ### Click on "Category" section and add one or more category,The category you've created will be shown on bot only if you're add <span style="color:red">"Subcategory"</span> to it
-<br />
-<br />
-<br />
 
 ---
 
@@ -68,4 +68,4 @@ Once You've added "Category" "Subcategory" and "Product" you can see it in your 
 
 ---
 
-# It's all for now and I hope I'll continue improving project...
+# It's all for now and I hope I'll continue improving project... :smile: :rocket::rocket::rocket:
