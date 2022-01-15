@@ -17,7 +17,7 @@ async def show_invoices(message: types.Message):
                            title=product.title,
                            description=product.description,
                            provider_token=PROVIDER_TOKEN,
-                           currency="UZS",
+                           currency="USD",
                            prices=[
                                LabeledPrice(
                                    label="Продукт",
@@ -63,7 +63,6 @@ async def payment_process(message: types.Message, state: FSMContext):
     order_id = state_data.get("order_id")
     order_number = state_data.get("order_number")
     await update_order(order_id)
-    print(message)
     provider_payment_charge_id = message.successful_payment.provider_payment_charge_id
     answer = f"Спасибо, номер заказа {order_number}! Наш менеджер свяжется с вами для уточнения всех деталей.\n" + \
              f"ID транзакции: {provider_payment_charge_id}"
