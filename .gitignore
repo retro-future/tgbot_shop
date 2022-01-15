@@ -131,3 +131,5 @@ dmypy.json
 .env
 /products/
 
+/data/
+/postgres/

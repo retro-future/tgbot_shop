@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: PostgresDb
+    image: postgres
+    restart: always
+    volumes:
+      - ./postgres/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: tgbot
+      POSTGRES_PASSWORD: tgbot
+      POSTGRES_DB: tgshop
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U tgbot -d tgshop" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    networks:
+      - botnet
+
+  redis:
+    container_name: Redis
+    image: redis
+    networks:
+      - botnet
+
+  web:
+    container_name: BotAndDjango
+    build: .
+    command: bash -c "python manage.py runserver 0.0.0.0:8000 | python start_bot.py"
+    restart: always
+    volumes:
+      - .:/app
+    env_file: ".env"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    links:
+       - db
+       - redis
+    networks:
+      - botnet
+
+networks:
+  botnet:
+    driver: bridge

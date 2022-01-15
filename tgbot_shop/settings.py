@@ -58,8 +58,7 @@ ROOT_URLCONF = 'tgbot_shop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,17 +77,18 @@ WSGI_APPLICATION = 'tgbot_shop.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-PGUSER = env.str("PGUSER")
-PGPASSWORD = env.str("PGPASSWORD")
-Database = env.str("PGDATABASE")
+PGUSER = env.str("POSTGRES_USER")
+PGPASSWORD = env.str("POSTGRES_PASSWORD")
+Database = env.str("POSTGRES_DB")
+Database_host = env.str("ip")
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': Database,
         'USER': PGUSER,
         'PASSWORD': PGPASSWORD,
-        'HOST': 'localhost',
+        'HOST': Database_host,
         'PORT': '5432',
     }
 }

@@ -1,5 +1,5 @@
 from django.db import models
-from tgbot.utils.get_link_or_id import get_photo_link
+from bot.utils.get_link_or_id import get_photo_link
 
 
 class TimeModel(models.Model):
@@ -13,7 +13,7 @@ class TimeModel(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=200, db_index=True)
     tg_name = models.CharField(max_length=200, blank=True)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     slug = models.SlugField(max_length=160, unique=True)
 
     def __str__(self):
@@ -27,7 +27,7 @@ class Category(models.Model):
 class Subcategory(models.Model):
     name = models.CharField(max_length=200, db_index=True)
     tg_name = models.CharField(max_length=200, blank=True)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     slug = models.SlugField(max_length=160, unique=True)
     category = models.ForeignKey(Category, related_name='subcategories', on_delete=models.PROTECT)
 
