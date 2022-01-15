@@ -24,7 +24,7 @@ How to set up the project:
 ```
 ![](https://telegra.ph/file/e32b7b15a4ee03b938697.png)
 
-* This will create and start-up Bot and Django, once you start you'll get the notification in your bot like:
+* This will start-up Bot and Django, once you start you'll get the notification in your bot like:
 <br/>
 
 ![](https://telegra.ph/file/d0377e40fd1263a50389d.png)
