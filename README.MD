@@ -66,6 +66,16 @@ Once You've added "Category" "Subcategory" and "Product" you can see it in your 
 
 ![](https://telegra.ph/file/56651db3d2cda6d7786ef.png)
 
+Click on category you've created e.g. and you'll see your subcatecory:
+
+![](https://telegra.ph/file/3c9d1aa2adaf97fb23e7f.png)
+
+After You clicked on subcategory you turn to inline-mode and list of your products will be displayed:
+
+![](https://telegra.ph/file/a5c5f17a2ec1564efdc0a.png)
+
+![](https://telegra.ph/file/e6f9dfb662bfd75eb926d.png)
+
 ---
 
-# It's all for now and I hope I'll continue improving project... :smile: :rocket::rocket::rocket:
+# It's all for now and I hope I'll continue improving project... :sunglasses: :rocket::rocket::rocket:
