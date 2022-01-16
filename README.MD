@@ -33,7 +33,7 @@ How to set up the project:
 
 * After you have to execute commands consistently:
 ```bash
-  docker exec -it <container_id_or_name> python manage.py createsuperuser
+  docker exec -it <container_id_or_name> python manage.py migrate
 ```
 
 ```bash
